@@ -6,7 +6,7 @@
 // ==========================
 // CONFIG
 // ==========================
-const API_URL = "https://script.google.com/macros/s/AKfycbzyaN272KEqf2cgzIZArHxF_OB2VxJg-VLKlKCRS-Cx5xHnMTLATdBZs0Iu_8Nge_89/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwZlK_WhB2UfGaLqmv7KqybxoGFPq5MaKhzNcO9wjzq_bbfGqCJX5xdpFP1EVFrAmaY/exec";
 
 let currentAsset = null;
 let scanner = null;
