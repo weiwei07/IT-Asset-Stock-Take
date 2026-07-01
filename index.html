@@ -6,7 +6,7 @@
 <title>IT Asset Stock Take</title>
 
 <link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/html5-qrcode" defer></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="script.js" defer></script>
 </head>
 <body>
@@ -14,6 +14,7 @@
 <div class="container">
 
     <div class="header">
+    <div id="messageBox" class="message" style="display:none;"></div>
         <h1>💻 IT Asset Stock Take</h1>
         <p>Google Sheets Asset Verification System</p>
     </div>
@@ -39,11 +40,11 @@
 
         <h2>Search Asset</h2>
 
-        <input type="text"
-               id="assetID"
-               placeholder="Scan QR Code or Enter Asset ID">
+        <input
+	  id="searchInput"
+	  placeholder="Scan QR Code or Enter Asset ID">
 
-        <button id="scanBtn" onclick="startScanner()">
+        <button id="scanBtn">
             📷 Scan QR
         </button>
 
@@ -51,8 +52,9 @@
             🔍 Search
         </button>
 
-        <div id="reader"
-             style="width:100%;margin-top:20px;display:none;">
+        <div
+	     id="qr-reader"
+             style="display:none;width:100%;margin-top:20px;">
         </div>
 
     </div>
@@ -61,7 +63,7 @@
         Searching...
     </div>
 
-    <div id="assetCard" class="assetCard" style="display:none;">
+    <div id="assetInfo" class="assetCard" style="display:none;">
 
         <h2>Asset Information</h2>
 
