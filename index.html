@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Asset Stock Take</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/html5-qrcode" defer></script>
+<script src="script.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>💻 IT Asset Stock Take</h1>
+        <p>Google Sheets Asset Verification System</p>
+    </div>
+
+    <div class="dashboard">
+        <div class="card">
+            <div class="number" id="totalAssets">0</div>
+            <div class="label">Total Assets</div>
+        </div>
+
+        <div class="card verified">
+            <div class="number" id="verifiedAssets">0</div>
+            <div class="label">Verified</div>
+        </div>
+
+        <div class="card pending">
+            <div class="number" id="pendingAssets">0</div>
+            <div class="label">Pending</div>
+        </div>
+    </div>
+
+    <div class="searchBox">
+
+        <h2>Search Asset</h2>
+
+        <input type="text"
+               id="assetID"
+               placeholder="Scan QR Code or Enter Asset ID">
+
+        <button id="scanBtn" onclick="startScanner()">
+            📷 Scan QR
+        </button>
+
+        <button onclick="searchAsset()">
+            🔍 Search
+        </button>
+
+        <div id="reader"
+             style="width:100%;margin-top:20px;display:none;">
+        </div>
+
+    </div>
+
+    <div id="loading" class="loading" style="display:none;">
+        Searching...
+    </div>
+
+    <div id="assetCard" class="assetCard" style="display:none;">
+
+        <h2>Asset Information</h2>
+
+        <table>
+            <tr><td class="title">Asset ID</td><td id="showAssetID"></td></tr>
+            <tr><td class="title">Asset Name</td><td id="showAssetName"></td></tr>
+            <tr><td class="title">User</td><td id="showUser"></td></tr>
+            <tr><td class="title">Purchase Date</td><td id="showPurchase"></td></tr>
+            <tr><td class="title">Current Location</td><td id="showLocation"></td></tr>
+            <tr><td class="title">Remarks</td><td id="showRemarks"></td></tr>
+            <tr><td class="title">Verified</td><td id="showVerified"></td></tr>
+        </table>
+
+        <hr>
+
+        <h3>Verification</h3>
+
+        <label>Current Location</label>
+        <select id="locationSelect"></select>
+
+        <label>Condition</label>
+        <select id="conditionSelect"></select>
+
+        <label>Verified By</label>
+        <input type="text"
+               id="verifiedBy"
+               placeholder="Enter Your Name">
+
+        <button class="verifyButton" onclick="verifyAsset()">
+            ✅ VERIFY ASSET
+        </button>
+
+    </div>
+
+    <div id="searchResult"></div>
+
+    <div class="footer">
+        IT Asset Stock Take System<br>
+        Version 2.0
+    </div>
+
+</div>
+
+</body>
+</html>
