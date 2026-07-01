@@ -159,13 +159,18 @@ td.title{
     color:#721c24;
 }
 
+.info{
+    background:#d1ecf1;
+    color:#0c5460;
+}
+
 .footer{
     text-align:center;
     color:#777;
     padding:20px;
 }
 
-#reader{
+#qr-reader{
     border-radius:8px;
     overflow:hidden;
 }
