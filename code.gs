@@ -3,7 +3,7 @@
  * REST API Backend - Google Apps Script
  ******************************************************/
 
-const SPREADSHEET_ID = "1lUZrsjT4WrsjWqLulTLABp33lGxykA4EBklKFx1eV0I";
+const SPREADSHEET_ID = "1CDxeHOmRHN08108QbXoeDFnJ5DiRjGPj5FBl9FfYVhc";
 const SHEET_NAME = "Assets";
 
 /******************************************************
