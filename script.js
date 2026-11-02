@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loadConditions();
     setupEventListeners();
     fixIOSCamera();
+    window.addEventListener("pagehide", stopQRScanner);
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stopQRScanner();
+    });
 });
 
 // ==========================
@@ -96,7 +100,7 @@ async function loadDashboard() {
 // ==========================
 async function loadLocations() {
     const data = await apiCallGet("locations");
-    
+
     if (!data || !data.success || !data.data) {
         console.error("Failed to load locations");
         return;
@@ -106,7 +110,7 @@ async function loadLocations() {
     if (!select) return;
 
     select.innerHTML = '<option value="">-- Select Location --</option>';
-    
+
     data.data.forEach(location => {
         const option = document.createElement("option");
         option.value = location;
@@ -120,7 +124,7 @@ async function loadLocations() {
 // ==========================
 async function loadConditions() {
     const data = await apiCallGet("conditions");
-    
+
     if (!data || !data.success || !data.data) {
         console.error("Failed to load conditions");
         return;
@@ -130,7 +134,7 @@ async function loadConditions() {
     if (!select) return;
 
     select.innerHTML = '<option value="">-- Select Condition --</option>';
-    
+
     data.data.forEach(condition => {
         const option = document.createElement("option");
         option.value = condition;
@@ -154,21 +158,17 @@ async function searchAsset() {
 
     // Try to get single asset by ID first
     let result = await apiCallGet("getasset", { id: keyword });
-    
+
     if (result && result.success) {
-        // Found a single asset
         currentAsset = result;
         displayAsset(result);
     } else {
-        // Search by keyword
         result = await apiCallGet("search", { keyword });
         if (result && result.success && result.data && result.data.length > 0) {
             if (result.data.length === 1) {
-                // Only one result, display it
                 currentAsset = result.data[0];
                 displayAsset(currentAsset);
             } else {
-                // Multiple results
                 showMessage(`Found ${result.data.length} assets. Showing first match.`, "info");
                 currentAsset = result.data[0];
                 displayAsset(currentAsset);
@@ -179,6 +179,7 @@ async function searchAsset() {
     }
 
     showLoading(false);
+    stopQRScanner();
 }
 
 // ==========================
@@ -198,7 +199,11 @@ function displayAsset(asset) {
     document.getElementById("showRemarks").innerText = asset.remarks || "-";
     document.getElementById("showVerified").innerText = (asset.verified === "YES" || asset.verified === "Yes") ? "✅ Yes" : "❌ No";
 
-    // Scroll to asset info
+    const userInput = document.getElementById("userInput");
+    const remarkInput = document.getElementById("remarkInput");
+    if (userInput) userInput.value = asset.user || "";
+    if (remarkInput) remarkInput.value = asset.remarks || "";
+
     document.getElementById("assetInfo").scrollIntoView({ behavior: "smooth" });
 }
 
@@ -214,6 +219,8 @@ async function verifyAsset() {
     const location = document.getElementById("locationSelect").value;
     const condition = document.getElementById("conditionSelect").value;
     const verifier = document.getElementById("verifiedBy").value.trim();
+    const userName = document.getElementById("userInput").value.trim();
+    const remark = document.getElementById("remarkInput").value.trim();
 
     if (!location) {
         showMessage("Please select a location", "error");
@@ -222,6 +229,11 @@ async function verifyAsset() {
 
     if (!condition) {
         showMessage("Please select a condition", "error");
+        return;
+    }
+
+    if (!userName) {
+        showMessage("Please enter the asset user", "error");
         return;
     }
 
@@ -235,6 +247,8 @@ async function verifyAsset() {
     const result = await apiCall("verify", {
         row: currentAsset.row,
         location: location,
+        user: userName,
+        remark: remark,
         verifier: verifier,
         condition: condition
     });
@@ -266,18 +280,22 @@ function startQRScanner() {
     isScanning = true;
     if (btn) btn.textContent = "❌ Stop Scanning";
 
-    // Show QR reader
     const qrElement = document.getElementById(readerId);
     if (qrElement) qrElement.style.display = "block";
+
+    if (scanner) {
+        scanner.clear();
+        scanner = null;
+    }
 
     scanner = new Html5Qrcode(readerId);
 
     scanner.start(
         { facingMode: "environment" },
-        { 
-            fps: 10, 
+        {
+            fps: 10,
             qrbox: { width: 250, height: 250 },
-            disableFlip: false 
+            disableFlip: false
         },
         (decodedText) => {
             console.log("QR Code detected:", decodedText);
@@ -285,7 +303,6 @@ function startQRScanner() {
             handleQRResult(decodedText);
         },
         (errorMessage) => {
-            // Suppress repeated error messages
             console.debug("QR Scan progress:", errorMessage);
         }
     ).catch(err => {
@@ -299,19 +316,29 @@ function startQRScanner() {
 
 function stopQRScanner() {
     const readerId = "qr-reader";
-    
+    const btn = document.getElementById("scanBtn");
+
     if (scanner) {
-        scanner.stop().then(() => {
-            scanner.clear();
-            console.log("Scanner stopped");
-        }).catch(err => {
-            console.error("Stop scanner error:", err);
-        });
+        scanner.stop()
+            .then(() => {
+                scanner.clear();
+                scanner = null;
+            })
+            .catch((err) => {
+                console.error("Stop scanner error:", err);
+            })
+            .finally(() => {
+                const qrElement = document.getElementById(readerId);
+                if (qrElement) qrElement.style.display = "none";
+                if (btn) btn.textContent = "📷 Scan QR";
+                isScanning = false;
+            });
+        return;
     }
-    
+
     const qrElement = document.getElementById(readerId);
     if (qrElement) qrElement.style.display = "none";
-    
+    if (btn) btn.textContent = "📷 Scan QR";
     isScanning = false;
 }
 
@@ -357,8 +384,11 @@ function resetSearch() {
     document.getElementById("searchInput").value = "";
     document.getElementById("assetInfo").style.display = "none";
     document.getElementById("verifiedBy").value = "";
+    document.getElementById("userInput").value = "";
+    document.getElementById("remarkInput").value = "";
     document.getElementById("locationSelect").value = "";
     document.getElementById("conditionSelect").value = "";
+    stopQRScanner();
     currentAsset = null;
 }
 
@@ -368,10 +398,10 @@ function resetSearch() {
 function fixIOSCamera() {
     // Check if we're on iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
+
     if (isIOS) {
         console.log("iOS device detected - applying camera fixes");
-        
+
         // Add playsinline to any video elements that get created
         document.addEventListener("DOMContentLoaded", () => {
             const videos = document.querySelectorAll("video");
