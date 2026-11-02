@@ -41,8 +41,8 @@
         <h2>Search Asset</h2>
 
         <input
-	  id="searchInput"
-	  placeholder="Scan QR Code or Enter Asset ID">
+      id="searchInput"
+      placeholder="Scan QR Code or Enter Asset ID">
 
         <button id="scanBtn">
             📷 Scan QR
@@ -53,8 +53,8 @@
         </button>
 
         <div
-	     id="qr-reader"
-             style="display:none;width:100%;margin-top:20px;">
+         id="qr-reader"
+              style="display:none;width:100%;margin-top:20px;">
         </div>
 
     </div>
@@ -83,6 +83,13 @@
 
         <label>Current Location</label>
         <select id="locationSelect"></select>
+
+        <label>Assigned User</label>
+        <input type="text" id="userInput" list="userList" placeholder="Search user from database">
+        <datalist id="userList"></datalist>
+
+        <label>Remark</label>
+        <textarea id="remarkInput" rows="3" placeholder="Enter remark"></textarea>
 
         <label>Condition</label>
         <select id="conditionSelect"></select>

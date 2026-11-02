@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadDashboard();
     loadLocations();
     loadConditions();
+    loadUsers();
     setupEventListeners();
     fixIOSCamera();
     window.addEventListener("pagehide", stopQRScanner);
@@ -33,6 +34,16 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupEventListeners() {
     const scanBtn = document.getElementById("scanBtn");
     if (scanBtn) scanBtn.onclick = startQRScanner;
+
+    const userInput = document.getElementById("userInput");
+    if (userInput) {
+        userInput.addEventListener("input", () => {
+            const value = userInput.value.trim();
+            if (value.length >= 2) {
+                loadUsers(value);
+            }
+        });
+    }
 }
 
 // ==========================
@@ -144,6 +155,38 @@ async function loadConditions() {
 }
 
 // ==========================
+// LOAD USERS / USER SEARCH
+// ==========================
+async function loadUsers(keyword = "") {
+    const requests = [
+        { action: "users", params: keyword ? { keyword } : {} },
+        { action: "searchuser", params: keyword ? { keyword } : {} },
+        { action: "userlist", params: keyword ? { keyword } : {} }
+    ];
+
+    const list = document.getElementById("userList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    for (const request of requests) {
+        const data = await apiCallGet(request.action, request.params);
+        if (!data || !data.success || !data.data) continue;
+
+        const users = Array.isArray(data.data) ? data.data : [];
+        users.forEach(user => {
+            const item = document.createElement("option");
+            item.value = user;
+            list.appendChild(item);
+        });
+
+        if (users.length > 0) {
+            return;
+        }
+    }
+}
+
+// ==========================
 // SEARCH ASSET
 // ==========================
 async function searchAsset() {
@@ -156,7 +199,6 @@ async function searchAsset() {
 
     showLoading(true);
 
-    // Try to get single asset by ID first
     let result = await apiCallGet("getasset", { id: keyword });
 
     if (result && result.success) {
@@ -190,7 +232,6 @@ function displayAsset(asset) {
 
     document.getElementById("assetInfo").style.display = "block";
 
-    // Update all fields with proper error handling
     document.getElementById("showAssetID").innerText = asset.assetID || "-";
     document.getElementById("showAssetName").innerText = asset.assetName || "-";
     document.getElementById("showUser").innerText = asset.user || "-";
@@ -396,13 +437,11 @@ function resetSearch() {
 // CAMERA IMPROVEMENT (iOS fix)
 // ==========================
 function fixIOSCamera() {
-    // Check if we're on iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
     if (isIOS) {
         console.log("iOS device detected - applying camera fixes");
 
-        // Add playsinline to any video elements that get created
         document.addEventListener("DOMContentLoaded", () => {
             const videos = document.querySelectorAll("video");
             videos.forEach(video => {
@@ -419,7 +458,7 @@ function fixIOSCamera() {
 // ==========================
 setInterval(() => {
     loadDashboard();
-}, 60000); // every 60 seconds
+}, 60000);
 
 // ==========================
 // WINDOW RESIZE HANDLER
@@ -445,5 +484,6 @@ window.app = {
     startQRScanner,
     stopQRScanner,
     resetSearch,
-    loadDashboard
+    loadDashboard,
+    loadUsers
 };
